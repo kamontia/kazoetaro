@@ -4,6 +4,9 @@ import time
 from config_parser import ConfigParser
 from functools import wraps
 
+import os
+import subprocess
+
 client = discord.Client()
 pretime_dict = {}
 
@@ -20,7 +23,7 @@ class Kazoetaro():
     async def on_ready(self):
         print("on_ready")
         pass
-				
+
     @client.event
     async def on_message(self, message):
         print('Message from {0.author}: {0.content}'.format(message))
@@ -98,13 +101,24 @@ def measure_time():
 
 
 if __name__ == "__main__":
-    parser = ConfigParser()
-    config = parser.load()
+	APIKEY=None
+	try: 
+		parser = ConfigParser()
+		config = parser.load()
+		APIKEY = config.get('bot', 'APIKEY')
+	except: 
+		pass
 
     kazoetaro = Kazoetaro()
     kazoetaro.setNotifyChannel()
 
-    APIKEY = config.get('bot', 'APIKEY')
-    print("APIKEY:", APIKEY)
+
+	if APIKEY is None:
+		APIKEY=os.environ['APIKEY']
+
+		if APIKEY is None:
+			APIKEY=os.environ['APIKEY']
+			    
+		print("APIKEY:", APIKEY)
 
     client.run(APIKEY)
