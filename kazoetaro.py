@@ -6,6 +6,9 @@ from functools import wraps
 
 import os
 import subprocess
+import logging
+import traceback
+import sys
 
 client = discord.Client()
 pretime_dict = {}
@@ -20,16 +23,16 @@ class Kazoetaro():
 		self.channel = channel
 
 	@client.event
-	async def on_ready(self):
+	async def on_ready():
 		print("on_ready")
 		pass
 
 	@client.event
-	async def on_message(self, message):
+	async def on_message(message):
 		print('Message from {0.author}: {0.content}'.format(message))
 
 	@client.event
-	async def on_voice_state_update(self,member, before, after):
+	async def on_voice_state_update(member, before, after):
 		# bot かどうかチェック
 		if member.bot:
 			print("I'm BOT")
@@ -56,71 +59,61 @@ class Kazoetaro():
 		if (after.channel is None):
 			print(pretime_dict[member.display_name])
 			duration_time = pretime_dict[member.display_name] - datetime.datetime.now()
-			reply_message = member.display_name + \
-					"がVCから出ていったで。時間は…" +\
-					str(execution_time) + "秒…こんなもんやろ"
-			await channel.send(reply_message)
 
-			# try:
-			#     execution_time = int(duration_time.total_seconds()) * -1
-			#     if execution_time >= 60:
-			#         # minutes
-			#         h, m, s = get_h_m_s(execution_time)
-			#     elif execution_time >= 3600:
-			#         # hour
-			#         h, m, s = get_h_m_s(execution_time)
+			try:
+					execution_time = int(duration_time.total_seconds()) * -1
+					print(execution_time)
+					if  execution_time <60 :
+							reply_message = "「" + member.display_name +  \
+								"」がVCから出ていったで。時間は…" +str(execution_time)+ \
+								"秒か…やる気ある??"
+							await channel.send(reply_message)
+					
+					elif 60 <= execution_time < 3600:
+							# minutes
+							h,m, s = get_h_m_s(execution_time)
+							reply_message = "「" + member.display_name +  \
+							"」がVCから出ていったで。時間は…" +\
+							str(m) + "分" + str(s) + "秒やな…ええんちゃうん？"
 
-			#     print(execution_time)
-			#     reply_message = member.display_name + \
-			#         "がVCから出ていったで。時間は…" +\
-			#         str(execution_time) + "秒…こんなもんやろ"
-			#     await channel.send(reply_message)
-			# except Exception:
-			#     await channel.send("なーんかエラー起きたみたいやで...すまんな")
+							await channel.send(reply_message)
 
+					elif 3600 <= execution_time :
+							# hour
+							h, m, s = get_h_m_s(execution_time)
+							reply_message = "「"+ member.display_name +  \
+							"」がVCから出ていったで。時間は…" +\
+							str(h)+"時間"+str(m) + "分" + str(s) + "秒やな…やるやないか"
+							await channel.send(reply_message)
 
-def stop_watch(func):
-	@wraps(func)
-	def wrapper(*args, **kargs):
-		start = time.time()
-		result = func(*args, **kargs)
-		elapsed_time = time.time() - start
-		return result, elapsed_time
-	return wrapper
+			except Exception as e:
+					tb = sys.exc_info()[2]
+					print(sys.exc_info())
+					print("Message:{0}".format(e.with_traceback(tb)))
+					print("Trace:{0}".format(e.with_traceback(sys.exc_info())))
+
+					await channel.send("なーんかエラー起きたみたいやで...すまんな")
 
 
 def get_h_m_s(td):
-	m, s = divmod(td.seconds, 60)
+	m, s = divmod(td, 60)
 	h, m = divmod(m, 60)
 	return h, m, s
 
 
-def measure_time():
-	while True:
-		pass
-
-
 if __name__ == "__main__":
-<<<<<<< HEAD
 	APIKEY=None
 	try: 
-		parser = ConfigParser()
-		config = parser.load()
-		APIKEY = config.get('bot', 'APIKEY')
+		# parser = ConfigParser()
+		# config = parser.load()
+		# APIKEY = config.get('bot', 'APIKEY')
+		pass
 	except: 
 		pass
-=======
-	parser = ConfigParser()
-	config = parser.load()
->>>>>>> 58cc5fe... Add config parser
 
-	kazoetaro = Kazoetaro()
-	kazoetaro.setNotifyChannel()
+	# kazoetaro = Kazoetaro()
+	# kazoetaro.setNotifyChannel()
 
-<<<<<<< HEAD
-=======
-	APIKEY = config.get('bot', 'APIKEY')
->>>>>>> 58cc5fe... Add config parser
 
 	if APIKEY is None:
 		APIKEY=os.environ['APIKEY']
